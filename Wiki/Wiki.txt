@@ -1,0 +1,215 @@
+CryoFall Dedicated Server
+Wiki : https://wiki.atomictorch.com/CryoFall/Server/Setup
+
+CryoFall/Server/Setup
+Jump to: navigation, search
+Contents
+
+    1 Local server / Singleplayer
+    2 Using game server hosting providers
+        2.1 Game server rent service
+    3 Self-hosting
+        3.1 Requirements
+            3.1.1 Hardware requirements
+            3.1.2 Software (system) requirements
+        3.2 Server installation with Docker (best way for Linux)
+        3.3 Server installation / direct download (Windows, Linux, Mac)
+            3.3.1 How to setup your own server (on any OS):
+            3.3.2 Starting the server
+            3.3.3 Connecting to the server
+        3.4 Server update/upgrade to new version
+        3.5 Server commands
+        3.6 Moderation (whitelist, blacklist, kicking, muting)
+        3.7 Server rates adjusting / Enabling PvP mode
+        3.8 Server raiding hours (for PvP)
+        3.9 How to prohibit client modifications
+
+Local server / Singleplayer
+
+Starting with R31 "Singleplayer Update" the local server is seamlessly integrated into the game client. Other players can also connect to you over LAN (new tab in Multiplayer menu) and even over the internet with virtual LAN (with software such as Hamachi).
+Using game server hosting providers
+Game server rent service
+
+If you don't want to hassle with the game server setup, you can rent your own CryoFall server from any third party game server hosting company in just a few minutes. They provide data center locations in almost every country around the world!
+
+    PingPerfect
+    4PLAYERS (the website is available in German only)
+
+Please note that AtomicTorch Studio is not affiliated with any of these companies and not responsible for their service quality so in case of any issues please reach them directly. So far we've heard only positive feedback about their services.
+
+
+Self-hosting
+Requirements
+Hardware requirements
+
+(for up to about 30 players online) 1-core CPU 1.6-2 GHz, 1.5 GB RAM, 2-3 Mbit/s bandwidth (each way)
+(for up to about 100 players online) 2-core CPU 1.6-2 GHz, 2 GB RAM, 3-6 Mbit/s bandwidth
+(for up to about 200 players online) 2-core CPU 2.4-3 GHz, 2 GB RAM, 6-12 Mbit/s bandwidth
+(for up to about 300 players online) 2-core CPU 3+ GHz, 2.5 GB RAM, 12-20 Mbit/s bandwidth
+Usually, VPS (virtual machines) hosting such as Vultr.com (this is our referral link as we're using this company services to host our own servers) is sufficient for hosting a game server. Using 1-core machines is not recommended as the game requires a secondary CPU to ensure smooth performance without hiccups during intensive background operations (such as world snapshot saving). Using more than a 2-core machine for a single game server hosting is redundant as the game cannot utilize more than two cores due to the sequential execution of the game simulation (except networking).
+Software (system) requirements
+
+The server could run on Windows, Linux, and Mac. To achieve this the game server is using .NET Runtime 6.0. For hosting the official game servers we prefer using CentOS 7 with Docker or CentOS 8 with podman (OSS alternative to Docker).
+Server installation with Docker (best way for Linux)
+
+We recommend this for Linux only. Please follow this guide CryoFall Dedicated Server Docker Image then return back here to "Server installation" section and follow the list after number 7. Ignore instructions on how to start the server with "dotnet" as you should use "docker run ..." instead as explained in the Docker guide above.
+Server installation / direct download (Windows, Linux, Mac)
+How to setup your own server (on any OS):
+
+    Download and install .NET Runtime 6.0 x64—please visit Download .NET page and follow the installation guide for your OS (for Windows you need to download x64 version from the "Run console apps" section).
+    Download the game server package. There are several ways to do this:
+        You can download it directly from our website:
+            SERVER DOWNLOAD LINK (any OS)
+            Extract the downloaded package (it's a regular ZIP archive).
+        Alternatively, you can download it from Steam Client: (preferable, as this way you can easily download updates)
+            Launch Steam Client
+            Select LIBRARY tab
+            Click on "ALL" and toggle "Tools"
+            Search for "CryoFall Dedicated Server" and install it
+        Alternatively, you can download it with SteamCMD (if you're familiar with it):
+            launch SteamCMD
+            enter:
+
+                login anonymous 
+                app_update 1061710 
+
+            navigate to the installation folder (usually in steamapps/Common/CryoFall Dedicated Server)
+    The server executable is located in the subfolder: "Binaries/Server". Open the command line/terminal/SSH (or PowerShell in Windows) and navigate to this folder (hint: in Windows you can simply SHIFT + Right-click on the "Server" folder in Explorer and select "Open PowerShell window here").
+    Start the server executable first time with loadOrNew flag. The server will start and create the game world.
+
+        dotnet CryoFall_Server.dll loadOrNew 
+
+    Usually it takes about 1-2 minutes to create a new world (or load a savegame). After that the server will keep writing performance statistics information every 20 seconds among other information such as the spawn scripts reporting and network events.
+    Stop the server. To do so enter the command below and press Enter key.
+
+        stop 0 
+
+    The server will save and quit. Now you have the "SettingsServer.xml" and "ModsConfig.xml" files.
+    Now you need to navigate to the subfolder "Data" (in the root of the server folder, not in the "Binaries/Server") and modify "SettingsServer.xml" to set the unique server name and set other settings, etc (there are XML comments explaining every setting so it should be straightforward). Please note that you can (and should) edit Description and Welcome message from the CURRENT GAME menu right from the game after connecting to your server.
+    If you are interested in making your server visible in the community servers list make sure to edit <is_public_server> and change the value from 0 to 1. Also, please make sure your router is configured correctly (port forwarding) to enable other people to connect to your machine from outside. But ideally, you should use dedicated server hardware (VPS or VDS) to host public servers.
+    While you're still editing "SettingsServer.xml" file, please find the value <server_operators_list> and change it to include your nickname! Otherwise, you will be unable to access your server console from the game and also you will be unable to edit the server's Description and Welcome message.
+    If you want to have a custom server icon, please replace the ServerIcon.png file in the "Data" subfolder.
+    The icon image file requirements: PNG24 format, 256x256 size, up to 100 KB.
+
+Important (for Windows only): you need to allow the dotnet process in the Windows Firewall settings—if the Firewall access request was not shown automatically by Windows you can add the C:\Program Files\dotnet\dotnet.exe file into Firewall whitelist. To do this, open Windows Start menu and search for "Allow an app through Windows Firewall" -> button "Allow another app".
+Starting the server
+
+    Launch the command line (we recommending PowerShell in Windows) and navigate to this folder (hint: in Windows you can simply SHIFT + Right-click on the "Server" folder in Explorer and select "Open PowerShell window here").
+    Start the server executable with load flag.
+
+        dotnet CryoFall_Server.dll load 
+
+    Stop your server by typing command below and pressing Enter key (it will save the world before stopping).
+
+        stop 60 The shutdown message text goes here 
+
+(Where 60 is the shutdown delay (in seconds) so the connected players will have some time to find a safe location)
+
+Please note that typing this message is really hard as the console is updating regularly! The best way is to simply copy-paste from the text editor the whole command text into the game console window (hint: you can paste in PowerShell by simply pressing the right mouse button) and pressing Enter key.
+
+You can always wipe the world by launching the game with new flag:
+
+    dotnet CryoFall_Server.dll new 
+
+Currently, we don't support the savegame migration between the major game versions (if there are changes to the game data serialization scheme). We plan to implement the proper data migration feature ASAP.
+Connecting to the server
+
+If you want to connect to your local game server, simply add SERVERS->Custom list as localhost
+
+To connect to the public server you need to navigate to SERVERS->Community servers list (please note that this might not work if you host this server on the same PC as the client, read below).
+
+If you're attempting to host your server on a home computer and other players cannot connect to it, you need to manually forward the port UDP 6000 on your home router to your local IP address (the game has the auto port forwarding feature but it often fails due to the difference in UPnP implementation on many routers). E.g. if your PC's IP address in local network is 192.168.1.100 (you can check it with ipconfig tool or in Windows network adapter's settings) you will need to setup a port forward rule on your router to forward traffic from port 6000 UDP to port 6000 UDP on IP address 192.168.1.100.
+
+If you're running a game server on the same PC as the game client:
+Please note that you might be unable to connect to the game server from the Community servers list on that PC due to NAT routing even with the proper port forwarding. In that case, simply add your server into the client custom servers list by providing its address as localhost:6000 and connect to it directly.
+
+If you're running a game server in the same local network as the game client (for example you want to play over LAN with your friends and family):
+You might be unable to connect to the game server from the Community servers list on that PC due to NAT routing even with the proper port forwarding. In that case, simply add your server into the client custom servers list by providing its local IP address (IPv4) and connect to it directly. To get your local IP address please use ipconfig command-line tool or check the network adapter properties in the network center. You need to get the local network IP address of the PC that is hosting the game server. Then add it in the custom servers list on your PC. You can lookup the IP address in the Windows network settings or by using CMD tool called ipconfig in Windows. For example, here we've run the ipconfig tool here and see the IPv4 address as 192.168.1.200 (screenshot). We can use it on any other PC in the local network to connect to that PC hosting the game server.
+
+Connecting to the private servers requires adding it via the Custom servers menu.
+
+6000 is the default port but you can change it in the Data/SettingsServer.xml file.
+Server update/upgrade to new version
+
+When we're releasing a new version of the game server, you need to follow these steps to update it:
+
+    (If you have not done this) Install ".NET Runtime" (version 6.0) https://dotnet.microsoft.com/download/dotnet/6.0/runtime
+    Ensure you've made a backup of the "Data" folder inside the game server installation folder.
+    If you're updating from A28 or earlier versions (ONLY), delete "Data/Saves" folder as the savegame is not compatible (breaking changes).
+    Update from A29 to R30/R31/R32 (or to any patch versions) doesn't require this step (savegame is compatible).
+    Download the new version of the server and overwrite your current installation with it (you can find the actual download link above in the "Installation" section).
+    Stop the game server (if it's running).
+    Important: please overwrite both Binaries and Core folders!
+    Start the server as usual.
+
+Server commands
+
+    Ensure you're the server operator (you've edited the ServerSettings.xml file and added yourself into the server_operators_list).
+    Connect to your game server.
+    The game console can be toggled by pressing ~ (the key on the left from 1 key) like in old-school games (you can change the key binding for console in the controls options).
+    Please add / (slash) prefix to the server commands you want to execute.
+    You can use Tab key to fill autocomplete, and you can use arrow Up/Down keys to navigate the suggestions list. Press Tab or Enter to accept the suggestion.
+
+
+Here is the page with the server commands list: Server Commands List
+Moderation (whitelist, blacklist, kicking, muting)
+
+Server operator can access special moderation commands. To invoke these commands, please ensure you're the server operator, connect to your game server, open the console (~ key) and then you can use these commands: (replace username with the actual player nickname)
+
+Whitelist management:
+
+/mod.whiteList.add username
+
+/mod.whiteList.remove username
+
+/mod.whiteList.print
+
+To enable whitelist:
+
+/mod.whiteList.enabled 1
+
+Blacklist management:
+
+/mod.blackList.add username
+
+/mod.blackList.remove username
+
+/mod.blackList.print
+
+Kicking players (temporary removing from server and blocking from connecting):
+
+/mod.kickList.add username durationInMinutes
+
+/mod.kickList.remove username
+
+/mod.kickList.print
+
+Muting players (temporary removing their ability to send messages to chat):
+
+/mod.muteList.add username durationInMinutes
+
+/mod.muteList.remove username
+
+/mod.muteList.print
+Server rates adjusting / Enabling PvP mode
+
+Server rates (and PvP mode setting) are exposed in a separate "rates" config file. You can quickly change things like LP gain rate, increase item drops, reduce the player to player damage to zero, or even increase the damage from creatures and make it really tough for the players!
+
+Important: Now you can edit the server rates right from the game if you have server operator access rights (if you don't, please see the guide above how to gain server operator rights by editing SettingsServer.xml file). If you're a server operator, please log in to your server, press ESC key and you will see a menu containing a button to browse the server rates—there is also a "Edit" button right next to it (if you don't see it, please ensure that you have server operator access rights).
+
+The guide below will explain how to edit the server rates config manually: To adjust the server rates, stop the server and check the file <game server>/Data/ServerRates.config Please read carefully—all the rates are disabled and in order to apply them you need to remove the # char at the start of the line! If you want to enable PvP, search PvP in the file. By default, this setting's value is 0 and you need to change it to 1 and remove the # char at the start of the line.
+Server raiding hours (for PvP)
+
+(Please note: with A27 this feature is not recommend anymore as there is a better feature now — S.H.I.E.L.D. protection that is enabled by default for PvP servers)
+
+On PvP server, you could set up specific hours during which the raiding is possible.
+By default, offline raiding protection is not enabled so players could raid other players' bases at any time.
+To enable offline raiding protection, please use this in-game console command:
+/admin.setRaidingWindow 4 14 1.5
+In this code we're using (first number) +4 GMT/UTC timezone, (second number) hour of day when raiding is possible (value from 0 to 24), and (third number) is the duration of the raiding window (value from 0 to 24).
+So the code in the example will allow raiding from 14:00 (or 2PM) for 1.5 hours.
+After changing the value you could open Politics/Diplomacy menu ([P] key) and verify whether you set the correct numbers.
+Please note that Politics/Diplomacy menu displaying your local time (in your PC timezone)!
+How to prohibit client modifications
+
+If you wish to restrict usage of any client modifications on your server, please find "<no_client_mods>" setting in the SettingsServer.xml file. Change the value from 0 to 1 to enable this feature. It's recommended for PvP servers to set it to 1. You can read more details about this feature in A28 Update announcement. 
