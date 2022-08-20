@@ -11,7 +11,8 @@ https://store.steampowered.com/app/829590/CryoFall/
 
 # Installation
 
-1. Download the latest release
+1. Download .NET 6.0 Runtime Console apps : https://dotnet.microsoft.com/en-us/download/dotnet/6.0/runtime
+2. Download the latest release
 2. Move **WindowsGSM.CryoFall.cs** folder to plugins folder
 3. Click **[RELOAD PLUGINS]** button or restart WindowsGSM
 

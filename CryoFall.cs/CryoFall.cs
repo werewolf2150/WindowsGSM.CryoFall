@@ -18,7 +18,7 @@ namespace WindowsGSM.Plugins
         public Plugin Plugin = new Plugin
         {
             name = "WindowsGSM.CryoFall", // WindowsGSM.XXXX
-            author = "Geekbee",
+            author = "werewolf2150",
             description = "WindowsGSM plugin for supporting CryoFall Dedicated Server",
             version = "1.0",
             url = "https://github.com/werewolf2150/WindowsGSM.CryoFall", // Github repository link (Best practice)
@@ -36,7 +36,7 @@ namespace WindowsGSM.Plugins
 
 
         // - Game server Fixed variables
-        public override string StartPath => @"Binaries/Server/Launch.bat"; // Game server start path
+        public override string StartPath => @"Binaries\Server\launch.bat"; // Game server start path
         public string FullName = "CryoFall Dedicated Server"; // Game server FullName
         public bool AllowsEmbedConsole = true;  // Does this server support output redirect?
         public int PortIncrements = 10; // This tells WindowsGSM how many ports should skip after installation
@@ -60,20 +60,19 @@ namespace WindowsGSM.Plugins
         // - Start server function, return its Process to WindowsGSM
         public async Task<Process> Start()
         {
-			
-            string shipExePath = Functions.ServerPath.GetServersServerFiles(_serverData.ServerID, StartPath);
-            if (!File.Exists(shipExePath))
+			string shipTestPath = Functions.ServerPath.GetServersServerFiles(_serverData.ServerID, @"Binaries\Server\Launch.bat");
+            if (!File.Exists(shipTestPath))
             {
-                Error = $"{Path.GetFileName(shipExePath)} not found ({shipExePath})";
+                Error = $"{Path.GetFileName(shipTestPath)} not found ({shipTestPath})";
                 return null;
             }			
-			
-		
+	
 
             // Prepare start parameter
 
 			string param = $"-batchmode {_serverData.ServerParam}" + (!AllowsEmbedConsole ? " -log" : string.Empty);	
-	
+			string shipExePath = Functions.ServerPath.GetServersServerFiles(_serverData.ServerID, StartPath);
+
 
 
             // Prepare Process
@@ -89,6 +88,7 @@ namespace WindowsGSM.Plugins
                 },
                 EnableRaisingEvents = true
             };
+
 
             // Set up Redirect Input and Output to WindowsGSM Console if EmbedConsole is on
             if (AllowsEmbedConsole)
@@ -130,7 +130,23 @@ namespace WindowsGSM.Plugins
             }
         }
 	
-	   // - Stop server function
-	   public async Task Stop(Process p) => await Task.Run(() => { p.Kill(); }); // It s not solution, first solution
+	    public async Task Stop(Process p)
+        {
+            await Task.Run(() =>
+            {
+                if (p.StartInfo.CreateNoWindow)
+                {
+                    Functions.ServerConsole.SetMainWindow(p.MainWindowHandle);
+                    Functions.ServerConsole.SendWaitToMainWindow("^c");
+					
+                }
+                else
+                {
+                    Functions.ServerConsole.SetMainWindow(p.MainWindowHandle);
+                    Functions.ServerConsole.SendWaitToMainWindow("^c");
+                }
+            });
+			await Task.Delay(20000);
+        }
     }
 }
